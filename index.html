@@ -3,400 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laboratoř Fotosyntézy 2.0</title>
+    <title>Master Fotosyntéza: Světelná a Temnostní fáze</title>
     <style>
-        /* --- 1. MODERNÍ GRAFIKA & CSS PROMĚNNÉ --- */
+        /* --- 1. DESIGN SYSTÉM --- */
         :root {
-            --primary-green: #4CAF50;
-            --dark-green: #2E7D32;
-            --sun-yellow: #FFD700;
-            --sky-blue: #87CEEB;
-            --water-blue: #2196F3;
-            --co2-grey: #607D8B;
-            --text-color: #333;
+            --bg-sky: linear-gradient(180deg, #4FC3F7 0%, #E1F5FE 100%);
+            --bg-stroma: linear-gradient(180deg, #66BB6A 0%, #2E7D32 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --primary: #2E7D32;
+            --accent: #FFD700;
+            --text: #37474F;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             margin: 0;
-            background: linear-gradient(to bottom, var(--sky-blue), #e0f7fa);
             height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             overflow: hidden;
+            color: var(--text);
+            transition: background 1s ease;
+            background: var(--bg-sky); /* Výchozí pozadí */
         }
 
-        /* --- 2. ROZLOŽENÍ HRY --- */
+        /* --- 2. UI ROZLOŽENÍ --- */
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            align-items: center;
+        }
+
         header {
+            padding: 15px;
             text-align: center;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.8);
+            background: white;
             width: 100%;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             z-index: 10;
         }
 
-        h1 { margin: 0; color: var(--dark-green); }
-        p { margin: 5px 0 0; color: #555; }
+        h1 { margin: 0; font-size: 1.5rem; color: var(--primary); }
+        .subtitle { font-size: 0.9rem; color: #666; }
 
-        #game-area {
-            position: relative;
+        /* Indikátor fáze */
+        .phase-indicator {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
+        }
+        .phase-dot {
+            padding: 5px 15px;
+            border-radius: 20px;
+            background: #eee;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #999;
+        }
+        .phase-dot.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* Hlavní plocha */
+        #viewport {
             flex-grow: 1;
             width: 100%;
-            max-width: 1000px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* --- 3. GRAFICKÉ PRVKY (List, Slunce) --- */
-        .sun {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 100px;
-            height: 100px;
-            background: radial-gradient(circle, var(--sun-yellow), #FFA500);
-            border-radius: 50%;
-            box-shadow: 0 0 40px var(--sun-yellow);
-            animation: pulse 3s infinite ease-in-out;
-            cursor: pointer;
-            z-index: 2;
-        }
-
-        .leaf-container {
             position: relative;
-            width: 400px;
-            height: 400px;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        .leaf-svg {
-            width: 100%;
-            height: 100%;
-            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2));
-            transition: transform 0.3s;
+        /* --- 3. PRVKY SCÉNY --- */
+        /* Světelná fáze - Thylakoid */
+        .thylakoid-membrane {
+            width: 300px;
+            height: 120px;
+            background: #4CAF50;
+            border-radius: 60px;
+            border: 4px solid #2E7D32;
+            position: relative;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            display: flex; /* Flex pro centrování obsahu */
+            justify-content: center;
+            align-items: center;
         }
         
-        .chloroplast {
-            fill: var(--primary-green);
-            stroke: var(--dark-green);
-            stroke-width: 2;
+        /* Temnostní fáze - Calvinův cyklus */
+        .calvin-cycle {
+            width: 300px;
+            height: 300px;
+            border: 10px dashed rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            position: relative;
+            animation: spin 60s linear infinite;
         }
 
-        /* Zóny pro drop */
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Drop zóny */
         .drop-zone {
-            position: absolute;
             width: 80px;
             height: 80px;
-            border: 3px dashed rgba(255,255,255,0.7);
+            border: 2px dashed #333;
             border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-align: center;
+            position: absolute;
+            transition: 0.3s;
+        }
+
+        .drop-zone.highlight { transform: scale(1.1); background: rgba(255,255,0,0.3); border-color: yellow; }
+        .drop-zone.filled { border-style: solid; background: white; color: var(--primary); }
+
+        /* Pozice pro Fázi 1 */
+        #zone-sun { top: -60px; left: 50%; transform: translateX(-50%); }
+        #zone-water { bottom: -50px; left: 20px; }
+        #output-o2 { bottom: -50px; right: 20px; border-color: transparent; opacity: 0.5; }
+
+        /* Pozice pro Fázi 2 */
+        #zone-atp { top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100px; height: 100px; }
+        #zone-co2 { top: -40px; left: 50%; transform: translateX(-50%); }
+        #output-sugar { bottom: -40px; left: 50%; transform: translateX(-50%); border-color: transparent; opacity: 0.5; }
+
+        /* --- 4. OVLÁDACÍ PRVKY (Molekuly) --- */
+        #inventory {
+            height: 120px;
+            background: white;
+            width: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-weight: bold;
-            color: white;
-            transition: all 0.3s;
-            background: rgba(0,0,0,0.1);
-            text-align: center;
-            font-size: 0.8rem;
-        }
-
-        .drop-zone.highlight {
-            border-color: yellow;
-            background: rgba(255, 255, 0, 0.2);
-            transform: scale(1.1);
-        }
-
-        /* Pozice dropzón na listu */
-        #zone-sun { top: -20px; left: 50%; transform: translateX(-50%); } /* Nahoře */
-        #zone-water { bottom: 20px; left: 20px; } /* Kořeny */
-        #zone-co2 { top: 50%; left: -40px; } /* Ze vzduchu */
-        
-        /* Výstupní zóny (skryté dokud není hotovo) */
-        #output-oxygen { top: 50%; right: -40px; opacity: 0.5; }
-        #output-glucose { bottom: 20px; right: 20px; opacity: 0.5; }
-
-        /* --- 4. OVLÁDACÍ PANEL (Molekuly) --- */
-        #controls {
-            background: white;
-            padding: 20px;
-            border-radius: 20px 20px 0 0;
-            width: 100%;
-            max-width: 800px;
-            display: flex;
-            justify-content: space-around;
+            gap: 20px;
             box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            z-index: 20;
         }
 
-        .draggable {
+        .item {
             width: 70px;
             height: 70px;
             border-radius: 50%;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            cursor: grab;
             font-weight: bold;
             color: white;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            transition: transform 0.2s;
+            cursor: grab;
+            box-shadow: 0 4px 5px rgba(0,0,0,0.2);
             user-select: none;
+            position: relative;
+        }
+        
+        .item:active { cursor: grabbing; transform: scale(0.95); }
+        .item span { pointer-events: none; }
+
+        .i-water { background: #29B6F6; }
+        .i-sun { background: #FFCA28; color: #333; box-shadow: 0 0 15px #FFCA28; }
+        .i-co2 { background: #78909C; }
+        .i-atp { background: #FF7043; font-size: 0.8rem; text-align: center; }
+
+        /* Skrývání prvků podle fáze */
+        .hidden { display: none !important; }
+        
+        /* Modal okno pro zprávy */
+        #modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
             z-index: 100;
         }
-
-        .draggable:active { cursor: grabbing; transform: scale(0.9); }
-        
-        .mol-water { background: var(--water-blue); }
-        .mol-co2 { background: var(--co2-grey); }
-        .mol-sun { background: var(--sun-yellow); color: #333; }
-
-        /* --- 5. ANIMACE --- */
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 40px var(--sun-yellow); }
-            50% { transform: scale(1.1); box-shadow: 0 0 60px var(--sun-yellow); }
-            100% { transform: scale(1); box-shadow: 0 0 40px var(--sun-yellow); }
-        }
-
-        @keyframes floatUp {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-100px); opacity: 0; }
-        }
-
-        .success-particle {
-            position: absolute;
-            font-size: 20px;
-            pointer-events: none;
-            animation: floatUp 2s ease-out forwards;
-        }
-
-        #message-box {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+        .modal-content {
             background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            padding: 30px;
+            border-radius: 15px;
             text-align: center;
-            display: none;
-            z-index: 20;
+            max-width: 400px;
+            animation: popIn 0.3s ease;
         }
+        @keyframes popIn { from {transform: scale(0.5);} to {transform: scale(1);} }
         
         button {
-            background: var(--primary-green);
+            margin-top: 15px;
+            padding: 10px 25px;
+            background: var(--primary);
             color: white;
             border: none;
-            padding: 10px 20px;
             border-radius: 5px;
-            cursor: pointer;
             font-size: 1rem;
-            margin-top: 10px;
+            cursor: pointer;
         }
+        button:hover { background: #1B5E20; }
+
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>Fotosyntéza: Interaktivní Model</h1>
-        <p>Přetáhni správné prvky (Vodu, CO2 a Sluneční energii) na list rostliny.</p>
-    </header>
+    <div id="game-container">
+        <header>
+            <h1>Laboratoř Fotosyntézy</h1>
+            <div class="phase-indicator">
+                <div id="ind-1" class="phase-dot active">1. Světelná fáze</div>
+                <div id="ind-2" class="phase-dot">2. Temnostní fáze (Calvinův cyklus)</div>
+            </div>
+        </header>
 
-    <div id="game-area">
-        <div class="sun"></div>
-
-        <div class="leaf-container">
-            <svg class="leaf-svg" viewBox="0 0 24 24">
-                <path class="chloroplast" d="M17,8C8,10,5.9,16.17,3.82,21.34L5.71,22l1-2.3A4.49,4.49,0,0,0,8,20C19,20,22,3,22,3,21,5,14,5.25,9,6.25S2,11.5,2,13.5a6.22,6.22,0,0,0,1.75,3.75C7,8,17,8,17,8Z"/>
-            </svg>
-
-            <div class="drop-zone" id="zone-sun" data-accept="sun">Energie<br>(Slunce)</div>
-            <div class="drop-zone" id="zone-water" data-accept="water">Voda<br>(H₂O)</div>
-            <div class="drop-zone" id="zone-co2" data-accept="co2">Oxid<br>(CO₂)</div>
-
-            <div class="drop-zone" id="output-oxygen" style="border-color: var(--sky-blue); display:none;">Kyslík<br>(O₂)</div>
-            <div class="drop-zone" id="output-glucose" style="border-color: orange; display:none;">Cukr<br>(C₆H₁₂O₆)</div>
-        </div>
-    </div>
-
-    <div id="controls">
-        <div class="draggable mol-water" draggable="true" id="drag-water" data-type="water">
-            <span>H₂O</span>
-        </div>
-        <div class="draggable mol-co2" draggable="true" id="drag-co2" data-type="co2">
-            <span>CO₂</span>
-        </div>
-        <div class="draggable mol-sun" draggable="true" id="drag-sun" data-type="sun">
-            <span>☀</span>
-        </div>
-    </div>
-
-    <div id="message-box">
-        <h2>Výborně! 🎉</h2>
-        <p>Rostlina úspěšně provedla fotosyntézu.</p>
-        <p><strong>Vstupy:</strong> Voda + CO₂ + Energie</p>
-        <p><strong>Výstupy:</strong> Kyslík + Glukóza</p>
-        <button onclick="location.reload()">Hrát znovu</button>
-    </div>
-
-    <script>
-        // --- LOGIKA HRY ---
-        const draggables = document.querySelectorAll('.draggable');
-        const dropZones = document.querySelectorAll('.drop-zone');
-        const leafContainer = document.querySelector('.leaf-container');
-        
-        let state = {
-            water: false,
-            co2: false,
-            sun: false
-        };
-
-        // 1. Nastavení Drag & Drop eventů
-        draggables.forEach(draggable => {
-            draggable.addEventListener('dragstart', () => {
-                draggable.classList.add('dragging');
-            });
-
-            draggable.addEventListener('dragend', () => {
-                draggable.classList.remove('dragging');
-            });
-            
-            // Podpora pro dotykové obrazovky (mobil)
-            draggable.addEventListener('touchstart', handleTouchStart, {passive: false});
-            draggable.addEventListener('touchmove', handleTouchMove, {passive: false});
-            draggable.addEventListener('touchend', handleTouchEnd);
-        });
-
-        dropZones.forEach(zone => {
-            zone.addEventListener('dragover', e => {
-                e.preventDefault(); // Povolit drop
-                const draggable = document.querySelector('.dragging');
-                if (draggable && zone.dataset.accept === draggable.dataset.type) {
-                    zone.classList.add('highlight');
-                }
-            });
-
-            zone.addEventListener('dragleave', () => {
-                zone.classList.remove('highlight');
-            });
-
-            zone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                const type = e.dataTransfer.getData('text/plain') || document.querySelector('.dragging').dataset.type;
-                handleDrop(type, zone);
-            });
-        });
-
-        // 2. Logika po upuštění
-        function handleDrop(type, zone) {
-            if (zone.dataset.accept === type) {
-                // Správný tah
-                zone.classList.remove('highlight');
-                zone.style.background = getColor(type);
-                zone.style.border = "none";
-                zone.innerHTML = "✔";
-                
-                // Přehrát efekt
-                createParticles(zone);
-                
-                // Aktualizovat stav
-                state[type] = true;
-                checkWin();
-            } else {
-                // Špatný tah - vizuální feedback
-                zone.style.borderColor = 'red';
-                setTimeout(() => zone.style.borderColor = 'rgba(255,255,255,0.7)', 500);
-            }
-        }
-
-        // 3. Kontrola vítězství
-        function checkWin() {
-            if (state.water && state.co2 && state.sun) {
-                setTimeout(() => {
-                    // Animace výroby
-                    document.getElementById('output-oxygen').style.display = 'flex';
-                    document.getElementById('output-glucose').style.display = 'flex';
+        <div id="viewport">
+            <div id="scene-1">
+                <div class="thylakoid-membrane">
+                    <span style="color: rgba(255,255,255,0.7); font-weight:bold;">Thylakoid</span>
                     
-                    // Efekt "dýchání" listu
-                    document.querySelector('.leaf-svg').style.transform = "scale(1.1)";
-                    setTimeout(() => document.querySelector('.leaf-svg').style.transform = "scale(1)", 500);
+                    <div class="drop-zone" id="zone-sun" data-accept="sun">Slunce<br>☀</div>
+                    <div class="drop-zone" id="zone-water" data-accept="water">Voda<br>H₂O</div>
+                    
+                    <div class="drop-zone" id="output-o2">Odpad:<br>Kyslík O₂</div>
+                </div>
+            </div>
 
-                    // Zobrazení vítězné zprávy
-                    setTimeout(() => {
-                        document.getElementById('message-box').style.display = 'block';
-                    }, 1500);
-                }, 500);
-            }
-        }
+            <div id="scene-2" class="hidden">
+                <div class="calvin-cycle">
+                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); text-align:center; color:white; font-weight:bold;">
+                        Stroma<br>(Calvinův cyklus)
+                    </div>
 
-        // Pomocné funkce
-        function getColor(type) {
-            if(type === 'water') return 'var(--water-blue)';
-            if(type === 'co2') return 'var(--co2-grey)';
-            if(type === 'sun') return 'var(--sun-yellow)';
-        }
-
-        function createParticles(element) {
-            const rect = element.getBoundingClientRect();
-            for (let i = 0; i < 5; i++) {
-                const part = document.createElement('div');
-                part.innerText = '+';
-                part.className = 'success-particle';
-                part.style.left = (rect.left + 20 + Math.random() * 40) + 'px';
-                part.style.top = (rect.top + Math.random() * 40) + 'px';
-                part.style.color = getColor(element.dataset.accept);
-                document.body.appendChild(part);
-                setTimeout(() => part.remove(), 2000);
-            }
-        }
-
-        // --- Logika pro mobily (Touch Events) ---
-        let initialX = 0, initialY = 0;
-        let currentElement = null;
-
-        function handleTouchStart(e) {
-            e.preventDefault();
-            currentElement = e.target.closest('.draggable');
-            const touch = e.touches[0];
-            initialX = touch.clientX - currentElement.getBoundingClientRect().left;
-            initialY = touch.clientY - currentElement.getBoundingClientRect().top;
-            currentElement.style.position = 'fixed';
-            currentElement.style.zIndex = 1000;
-        }
-
-        function handleTouchMove(e) {
-            if (!currentElement) return;
-            e.preventDefault();
-            const touch = e.touches[0];
-            currentElement.style.left = (touch.clientX - 35) + 'px'; // 35 je polovina šířky
-            currentElement.style.top = (touch.clientY - 35) + 'px';
-        }
-
-        function handleTouchEnd(e) {
-            if (!currentElement) return;
-            // Zjistit, nad čím jsme pustili
-            const touch = e.changedTouches[0];
-            currentElement.style.display = 'none'; // Skrýt, abychom viděli co je pod tím
-            let elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
-            currentElement.style.display = 'flex'; // Zobrazit zpět
-            
-            const dropZone = elemBelow.closest('.drop-zone');
-            
-            if (dropZone && dropZone.dataset.accept === currentElement.dataset.type) {
-                handleDrop(currentElement.dataset.type, dropZone);
-                currentElement.remove(); // Odstranit z nabídky
-            } else {
-                // Reset pozice
-                currentElement.style.position = 'static';
-            }
-            currentElement = null;
-        }
-
-    </script>
-</body>
-</html>
+                    <div class="drop-zone" id="zone-atp" data-accept="atp">Energie<br>(ATP+NADPH)</div>
+                    <div class="drop-zone" id="zone-co2" data-accept="co2">Uhlík<br
